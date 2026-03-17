@@ -1,0 +1,106 @@
+name: Build & Blue/Green Deploy (VMs)
+
+on:
+  push:
+    branches:
+      - main
+      - release
+      - develop
+      - feature/*
+      - hotfix/*
+  workflow_dispatch:
+
+env:
+  ARTIFACT: artifact.zip
+  DEPLOY_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/release' && 'staging' || github.ref == 'refs/heads/develop' && 'integration' || 'development' }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-path: ${{ steps.set-path.outputs.path }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build artifact (zip)
+        run: |
+          mkdir -p out
+          zip -r out/artifact.zip . -x .git\* .github\* node_modules\*
+          echo "out/artifact.zip" > artifact_path.txt
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact
+          path: out/artifact.zip
+
+  deploy-vm-bluegreen:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ${{ env.DEPLOY_ENV }}
+    if: github.ref != 'refs/heads/hotfix/*'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact
+          path: ./deploy
+
+      - name: Prepare SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key && chmod 600 key
+
+      - name: Run migrations (if configured)
+        if: ${{ secrets.MIGRATION_COMMAND != '' }}
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY_PATH: ${{ github.workspace }}/key
+          MIGRATION_COMMAND: ${{ secrets.MIGRATION_COMMAND }}
+        run: |
+          host=$(echo "${{ secrets.BLUE_HOSTS }}" | cut -d',' -f1)
+          bash ./deploy/run-migrations.sh "$host"
+
+      - name: Deploy to GREEN hosts
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY_PATH: ${{ github.workspace }}/key
+          HOSTS: ${{ secrets.GREEN_HOSTS }}
+          REMOTE_BASE: /opt/fxserver
+        run: |
+          bash ./deploy/deploy-to-host.sh green ./deploy/artifact.zip
+
+      - name: Smoke test GREEN
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY_PATH: ${{ github.workspace }}/key
+          HOSTS: ${{ secrets.GREEN_HOSTS }}
+        run: |
+          host=$(echo "${{ secrets.GREEN_HOSTS }}" | cut -d',' -f1)
+          ssh -o StrictHostKeyChecking=no -i "$SSH_KEY_PATH" "$SSH_USER@$host" 'curl -fsS http://127.0.0.1:30120/health'
+
+      - name: Switch load balancer to GREEN
+        if: success()
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          # Provide your load balancer id and green pool id via secrets
+          bash ./deploy/switch-pool.sh "${{ secrets.CF_LOAD_BALANCER_ID }}" "${{ secrets.CF_GREEN_POOL_ID }}"
+
+      - name: Verify public endpoint
+        run: |
+          curl -fS https://your-public-domain/health
+
+  rollback-on-failure:
+    needs: deploy-vm-bluegreen
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key && chmod 600 key
+      - name: Switch load balancer back to BLUE
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          bash ./deploy/switch-pool.sh "${{ secrets.CF_LOAD_BALANCER_ID }}" "${{ secrets.CF_BLUE_POOL_ID }}"

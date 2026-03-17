@@ -1,0 +1,13 @@
+[Unit]
+Description=Promtail (Loki log shipper)
+After=network.target
+
+[Service]
+Type=simple
+User=promtail
+Group=promtail
+ExecStart=/usr/bin/promtail -config.file=/opt/promtail/promtail-config.yaml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
