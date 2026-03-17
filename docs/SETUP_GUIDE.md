@@ -30,10 +30,18 @@ Database + Redis + Logs (Loki/Prometheus)
    - One checkbox for each task
 
 ### Understanding the Pipeline
-2. **[Pipeline Visualization](PIPELINE_VISUALIZATION.md)** ← **NEW**
-   - Complete ASCII diagrams of 6-stage pipeline
+2. **[Complete 10-Stage Pipeline](10STAGE_PIPELINE.md)** ← **NEW ENHANCED**
+   - Comprehensive 10-stage CI/CD workflow (commit → analysis → security → tests → build → staging → QA → production → traffic switch)
+   - Stage-by-stage timing and requirements
+   - Environment-specific behaviors (dev/int/staging/prod)
+   - Failure scenarios and automatic rollback procedures
+   - Pre-approval checklists (QA & DevOps)
+   - Troubleshooting guide
+
+3. **[Pipeline Visualization](PIPELINE_VISUALIZATION.md)** ← **Previous Version**
+   - Complete ASCII diagrams of pipeline flow
    - Environment & branch mapping table
-   - Detailed stage descriptions (build → test → deploy → canary → verify → rollback)
+   - Detailed stage descriptions
    - Decision trees for approval/rejection
    - Monitoring guidelines during canary phase
 
