@@ -29,25 +29,47 @@ Database + Redis + Logs (Loki/Prometheus)
    - Complete step-by-step checklist for all setup phases
    - One checkbox for each task
 
+### Understanding the Pipeline
+2. **[Pipeline Visualization](PIPELINE_VISUALIZATION.md)** ← **NEW**
+   - Complete ASCII diagrams of 6-stage pipeline
+   - Environment & branch mapping table
+   - Detailed stage descriptions (build → test → deploy → canary → verify → rollback)
+   - Decision trees for approval/rejection
+   - Monitoring guidelines during canary phase
+
+3. **[Workflow Training Guide](WORKFLOW_TRAINING.md)** ← **NEW**
+   - End-to-end examples from developer & DevOps perspective
+   - Test gate details and failure handling
+   - Canary deployment deep dive with metrics
+   - Environment-specific behavior (dev/int/staging/prod)
+   - Troubleshooting checklist
+
+4. **[Approval Gate Guide](APPROVAL_GATE_GUIDE.md)** ← **NEW**
+   - For deployment reviewers (DevOps, SRE, Release Manager)
+   - Pre-approval checklist (metrics, logs, baseline comparison)
+   - Step-by-step approval/rejection process in GitHub Actions
+   - Common scenarios and decision trees
+   - Best practices and escalation procedures
+
 ### Reference Guides
-2. **[Secrets Setup](SECRETS_SETUP.md)**
+5. **[Secrets Setup](SECRETS_SETUP.md)**
    - How to generate SSH keys
    - GitHub Secrets configuration
    - Environment-specific secrets
 
-3. **[Cloudflare Setup](CLOUDFLARE_SETUP.md)**
+6. **[Cloudflare Setup](CLOUDFLARE_SETUP.md)**
    - Create health checks, pools, load balancers
    - Get Cloudflare IDs for GitHub Secrets
    - Test API pool switching
    - Troubleshooting Cloudflare issues
 
-4. **[SSH Testing](SSH_TESTING.md)**
+7. **[SSH Testing](SSH_TESTING.md)**
    - Local SSH connection tests
    - GitHub Actions SSH verification
    - Common SSH errors & fixes
    - Diagnostic command reference
 
-5. **[FXServer Systemd Setup](FXSERVER_SYSTEMD_SETUP.md)**
+8. **[FXServer Systemd Setup](FXSERVER_SYSTEMD_SETUP.md)**
    - Create fxuser account
    - Setup directory structure
    - Install systemd unit templates
@@ -55,12 +77,12 @@ Database + Redis + Logs (Loki/Prometheus)
    - Manage services
 
 ### Tools & Helpers
-6. **Scripts in `scripts/`**:
+9. **Scripts in `scripts/`**:
    - `generate-deploy-key.ps1` — Generate SSH key pair (Windows PowerShell)
    - `diagnose-deployment.sh` — Run on target hosts to verify setup (bash)
 
 ### Workflow Reference
-7. **[README.md](../README.md)**
+10. **[README.md](../README.md)**
    - Git branching strategy
    - How deployments are triggered
    - Testing locally
