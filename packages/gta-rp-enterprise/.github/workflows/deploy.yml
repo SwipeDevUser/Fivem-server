@@ -1,0 +1,173 @@
+name: Deploy Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deployment
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Validate docker-compose.yml
+        run: docker-compose config > /dev/null
+
+      - name: Validate scripts
+        run: |
+          shellcheck deploy.sh rollback.sh || true
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Docker images
+        run: |
+          docker-compose build --no-cache
+
+      - name: Generate build artifacts
+        run: |
+          mkdir -p artifacts
+          docker-compose config > artifacts/docker-compose-resolved.yml
+          echo "Build completed at $(date -u +'%Y-%m-%dT%H:%M:%SZ')" > artifacts/build-info.txt
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: artifacts/
+          retention-days: 30
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ secrets.SERVER_HOST }}:3000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Pre-deployment backup
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.SERVER_HOST }} "
+            cd gta-rp-enterprise && \
+            echo 'Creating backup snapshot...' && \
+            docker-compose exec -T db mysqldump -u${{ secrets.DB_USER }} -p${{ secrets.DB_PASS }} ${{ secrets.DB_NAME }} > backups/pre-deploy-$(date +%s).sql 2>/dev/null || true && \
+            git stash
+          "
+
+      - name: Deploy to server
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.SERVER_HOST }} "
+            set -e
+            cd gta-rp-enterprise && \
+            echo 'Pulling latest changes...' && \
+            git pull origin main && \
+            echo 'Updating environment configuration...' && \
+            cp .env.example .env || true && \
+            echo 'Starting Docker services...' && \
+            docker-compose up -d --build && \
+            echo 'Deployment completed successfully!'
+          "
+
+      - name: Health check
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.SERVER_HOST }} "
+            set -e
+            echo 'Waiting for services to start...' && \
+            sleep 10 && \
+            echo 'Checking FiveM server health...' && \
+            curl -f http://localhost:3000/health || exit 1 && \
+            echo 'Checking MySQL connectivity...' && \
+            docker-compose exec -T db mysqladmin ping -u${{ secrets.DB_USER }} -p${{ secrets.DB_PASS }} && \
+            echo '✓ All health checks passed!'
+          "
+
+      - name: Verify resources loaded
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.SERVER_HOST }} "
+            echo 'Verifying FiveM resources...' && \
+            docker-compose logs fivem | tail -20
+          "
+
+      - name: Cleanup SSH key
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
+
+  rollback:
+    if: failure() && needs.deploy.result == 'failure'
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Execute rollback
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.SERVER_HOST }} "
+            cd gta-rp-enterprise && \
+            echo 'Deployment failed. Rolling back to previous version...' && \
+            git reset --hard HEAD~1 && \
+            docker-compose down && \
+            docker-compose up -d && \
+            echo 'Rollback completed!'
+          "
+
+      - name: Cleanup SSH key
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
+
+  notify:
+    if: always()
+    needs: [validate, build, deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment status
+        run: |
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "✅ Deployment successful!"
+            exit 0
+          else
+            echo "❌ Deployment failed!"
+            exit 1
+          fi
+
+      - name: Send Discord notification
+        if: always()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          status: ${{ job.status }}
+          title: "GTA RP Enterprise Deployment"
+          description: "Branch: main | Commit: ${{ github.sha }}"

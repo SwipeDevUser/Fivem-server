@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Police Records System</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #fff;
+        }
+
+        .container {
+            width: 90vw;
+            max-width: 1200px;
+            margin: 20px auto;
+            background: rgba(20, 20, 20, 0.95);
+            border: 2px solid #0066cc;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 102, 204, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #0066cc;
+            font-size: 28px;
+            text-shadow: 0 0 10px rgba(0, 102, 204, 0.5);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box input,
+        .search-box button {
+            padding: 10px 15px;
+            border: 1px solid #0066cc;
+            border-radius: 4px;
+            background: rgba(0, 102, 204, 0.1);
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .search-box input::placeholder {
+            color: #888;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            background: rgba(0, 102, 204, 0.2);
+            box-shadow: 0 0 10px rgba(0, 102, 204, 0.5);
+        }
+
+        .search-box button {
+            background: #0066cc;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #0052a3;
+            box-shadow: 0 0 15px rgba(0, 102, 204, 0.6);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #0066cc;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+        }
+
+        .tab:hover {
+            color: #fff;
+        }
+
+        .record-card {
+            background: rgba(0, 102, 204, 0.05);
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .record-card:hover {
+            background: rgba(0, 102, 204, 0.1);
+            box-shadow: 0 0 15px rgba(0, 102, 204, 0.2);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .record-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-clean {
+            background: rgba(0, 200, 0, 0.3);
+            color: #00ff00;
+        }
+
+        .status-wanted {
+            background: rgba(255, 0, 0, 0.3);
+            color: #ff0000;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-incarcerated {
+            background: rgba(255, 150, 0, 0.3);
+            color: #ffff00;
+        }
+
+        .record-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-label {
+            color: #888;
+            font-weight: bold;
+        }
+
+        .detail-value {
+            color: #0ff;
+        }
+
+        .warrant-card {
+            background: rgba(255, 0, 0, 0.1);
+            border-left: 4px solid #ff0000;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .warrant-reason {
+            color: #ff6666;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .warrant-amount {
+            color: #ffff00;
+            font-size: 14px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            background: #0066cc;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #0052a3;
+            box-shadow: 0 0 10px rgba(0, 102, 204, 0.5);
+        }
+
+        .btn-danger {
+            background: #cc0000;
+        }
+
+        .btn-danger:hover {
+            background: #aa0000;
+        }
+
+        .btn-success {
+            background: #00aa00;
+        }
+
+        .btn-success:hover {
+            background: #008800;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #cc0000;
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [data, setData] = useState(null);
+            const [activeTab, setActiveTab] = useState('search');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [plateTerm, setPlateTerm] = useState('');
+            const [playerId, setPlayerId] = useState('');
+
+            useEffect(() => {
+                window.addEventListener('message', (event) => {
+                    const item = event.data;
+
+                    if (item.type === 'updateRecord') {
+                        setData(item.data);
+                    }
+                    if (item.type === 'closeUI') {
+                        document.querySelector('.container').style.display = 'none';
+                    }
+                });
+            }, []);
+
+            const handleSearch = () => {
+                if (searchTerm) {
+                    const parts = searchTerm.split(' ');
+                    fetch(`https://${GetParentResourceName()}/search`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ firstName: parts[0], lastName: parts[1] })
+                    });
+                }
+            };
+
+            const handlePlateSearch = () => {
+                if (plateTerm) {
+                    fetch(`https://${GetParentResourceName()}/plateLookup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ plate: plateTerm })
+                    });
+                }
+            };
+
+            const handleGetRecord = () => {
+                if (playerId) {
+                    fetch(`https://${GetParentResourceName()}/getRecord`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ playerId: parseInt(playerId) })
+                    });
+                }
+            };
+
+            return (
+                <div className="container">
+                    <button className="close-btn" onClick={() => {}}>✕</button>
+                    
+                    <div className="header">
+                        <h1>🚓 POLICE RECORDS SYSTEM 🚓</h1>
+                    </div>
+
+                    <div className="tabs">
+                        <button className={`tab ${activeTab === 'search' && 'active'}`} onClick={() => setActiveTab('search')}>
+                            Player Search
+                        </button>
+                        <button className={`tab ${activeTab === 'record' && 'active'}`} onClick={() => setActiveTab('record')}>
+                            Criminal Record
+                        </button>
+                        <button className={`tab ${activeTab === 'warrants' && 'active'}`} onClick={() => setActiveTab('warrants')}>
+                            Warrants
+                        </button>
+                        <button className={`tab ${activeTab === 'plate' && 'active'}`} onClick={() => setActiveTab('plate')}>
+                            Plate Lookup
+                        </button>
+                        <button className={`tab ${activeTab === 'arrests' && 'active'}`} onClick={() => setActiveTab('arrests')}>
+                            Arrest History
+                        </button>
+                    </div>
+
+                    <div className="content">
+                        {activeTab === 'search' && (
+                            <div>
+                                <div className="search-box">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Enter player name..." 
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    <button onClick={handleSearch}>Search Records</button>
+                                </div>
+                                {data && data.searchResults && (
+                                    <div>
+                                        {data.searchResults.length > 0 ? (
+                                            data.searchResults.map((record, i) => (
+                                                <div key={i} className="record-card">
+                                                    <div className="record-header">
+                                                        <span className="record-name">{record.first_name} {record.last_name}</span>
+                                                        <span className={`status-badge status-${record.status}`}>
+                                                            {record.status}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="no-data">No records found</div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'record' && (
+                            <div>
+                                <div className="search-box">
+                                    <input 
+                                        type="number" 
+                                        placeholder="Enter Player ID..." 
+                                        value={playerId}
+                                        onChange={(e) => setPlayerId(e.target.value)}
+                                    />
+                                    <button onClick={handleGetRecord}>Get Record</button>
+                                </div>
+                                {data && data.record && (
+                                    <div className="record-card">
+                                        <div className="record-header">
+                                            <span className="record-name">{data.record.first_name} {data.record.last_name}</span>
+                                            <span className={`status-badge status-${data.record.status}`}>
+                                                {data.record.status}
+                                            </span>
+                                        </div>
+                                        <div className="record-details">
+                                            <div className="detail-row">
+                                                <span className="detail-label">DOB:</span>
+                                                <span className="detail-value">{data.record.date_of_birth}</span>
+                                            </div>
+                                            <div className="detail-row">
+                                                <span className="detail-label">Height:</span>
+                                                <span className="detail-value">{data.record.height}cm</span>
+                                            </div>
+                                            {data.record.charges && (
+                                                <div className="detail-row">
+                                                    <span className="detail-label">Charges:</span>
+                                                    <span className="detail-value">{data.record.charges}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'warrants' && (
+                            <div>
+                                {data && data.warrants && (
+                                    <div>
+                                        {data.warrants.length > 0 ? (
+                                            data.warrants.map((warrant, i) => (
+                                                <div key={i} className="warrant-card">
+                                                    <div className="warrant-reason">⚠️ {warrant.reason}</div>
+                                                    <div className="record-details">
+                                                        <div className="detail-row">
+                                                            <span className="detail-label">Issued:</span>
+                                                            <span className="detail-value">{new Date(warrant.issued_at).toLocaleDateString()}</span>
+                                                        </div>
+                                                        <div className="warrant-amount">Bail/Fine: ${warrant.amount}</div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="no-data">No active warrants</div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'plate' && (
+                            <div>
+                                <div className="search-box">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Enter plate..." 
+                                        value={plateTerm}
+                                        onChange={(e) => setPlateTerm(e.target.value)}
+                                    />
+                                    <button onClick={handlePlateSearch}>Search Plate</button>
+                                </div>
+                                {data && data.plate && (
+                                    <div className="record-card">
+                                        <div className="record-header">
+                                            <span className="record-name">{data.plate.plate}</span>
+                                            <span className={`status-badge status-${data.plate.status}`}>
+                                                {data.plate.status}
+                                            </span>
+                                        </div>
+                                        <div className="record-details">
+                                            <div className="detail-row">
+                                                <span className="detail-label">Vehicle:</span>
+                                                <span className="detail-value">{data.plate.vehicle_name}</span>
+                                            </div>
+                                            <div className="detail-row">
+                                                <span className="detail-label">Owner:</span>
+                                                <span className="detail-value">{data.plate.first_name} {data.plate.last_name}</span>
+                                            </div>
+                                            <div className="detail-row">
+                                                <span className="detail-label">Color:</span>
+                                                <span className="detail-value">{data.plate.color}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'arrests' && (
+                            <div>
+                                {data && data.arrests && (
+                                    <div>
+                                        {data.arrests.length > 0 ? (
+                                            data.arrests.map((arrest, i) => (
+                                                <div key={i} className="record-card">
+                                                    <div className="record-header">
+                                                        <span className="record-name">Arrest {i + 1}</span>
+                                                        <span className="detail-value">
+                                                            {new Date(arrest.arrested_at).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="record-details">
+                                                        <div className="detail-row">
+                                                            <span className="detail-label">Reason:</span>
+                                                            <span className="detail-value">{arrest.reason}</span>
+                                                        </div>
+                                                        <div className="detail-row">
+                                                            <span className="detail-label">By:</span>
+                                                            <span className="detail-value">{arrest.first_name} {arrest.last_name}</span>
+                                                        </div>
+                                                        {arrest.jail_time > 0 && (
+                                                            <div className="detail-row">
+                                                                <span className="detail-label">Jail Time:</span>
+                                                                <span className="detail-value">{arrest.jail_time} minutes</span>
+                                                            </div>
+                                                        )}
+                                                        {arrest.fine > 0 && (
+                                                            <div className="detail-row">
+                                                                <span className="detail-label">Fine:</span>
+                                                                <span className="detail-value">${arrest.fine}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="no-data">No arrest history</div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

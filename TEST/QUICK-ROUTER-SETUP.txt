@@ -1,0 +1,168 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║          FIVEM SERVER - 5 MINUTE ROUTER SETUP GUIDE               ║
+║                   (Copy & Paste Ready)                            ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+YOUR INFORMATION (Write this down):
+────────────────────────────────────
+Internal IP:    192.168.1.11
+External Port:  30120
+Internal Port:  30120
+Protocol:       TCP and UDP
+
+
+STEP 1: Open Your Router
+────────────────────────────────────
+Open your web browser and go to ONE of these:
+
+  🔗 http://192.168.1.1
+  🔗 http://192.168.0.1
+  🔗 http://routerlogin.net
+  🔗 http://router.asus.com
+
+(Usually 192.168.1.1 works for most routers)
+
+
+STEP 2: Login to Router
+────────────────────────────────────
+Username: admin (usually default)
+Password: admin (or check your router)
+
+⚠️  If you forgot password, look for reset button on router
+
+
+STEP 3: Find Port Forwarding
+────────────────────────────────────
+Look for one of these menu options:
+
+  ▸ Port Forwarding
+  ▸ Virtual Server
+  ▸ Port Mapping
+  ▸ NAT Settings
+  ▸ UPnP/UPnP IGD (try this if others not available)
+
+(Usually under "Advanced" or "Settings")
+
+
+STEP 4: Create First Rule (TCP)
+────────────────────────────────────
+
+Click "Add New" or "Add Rule"
+
+Fill in these fields:
+  ┌─────────────────────────────────┐
+  │ External Port:    30120         │
+  │ Internal Port:    30120         │
+  │ Internal IP:      192.168.1.11  │
+  │ Protocol:         TCP           │
+  │ Enable:           ✓ YES         │
+  └─────────────────────────────────┘
+
+Then click SAVE
+
+
+STEP 5: Create Second Rule (UDP)
+────────────────────────────────────
+
+Click "Add New" or "Add Rule" again
+
+Fill in these fields:
+  ┌─────────────────────────────────┐
+  │ External Port:    30120         │
+  │ Internal Port:    30120         │
+  │ Internal IP:      192.168.1.11  │
+  │ Protocol:         UDP           │
+  │ Enable:           ✓ YES         │
+  └─────────────────────────────────┘
+
+Then click SAVE
+
+
+STEP 6: Apply Changes
+────────────────────────────────────
+Look for: "Save", "Apply", or "Restart"
+
+Click it and wait for router to update (2-3 minutes)
+
+
+STEP 7: Test It Works
+────────────────────────────────────
+
+Open FiveM client and press F8 for console
+
+Type ONE of these:
+
+  > connect krb6e7.cfx.me
+  
+  OR
+  
+  > connect 108.188.113.251:30120
+
+If you join successfully → ✓ IT WORKED!
+
+
+ROUTER-SPECIFIC INSTRUCTIONS:
+────────────────────────────────────
+
+TP-LINK:
+  Go to → Advanced → Network → NAT Forwarding
+  
+NETGEAR:
+  Go to → Advanced → Port Forwarding
+  
+LINKSYS:
+  Go to → Advanced → Port Range Forwarding
+  
+D-LINK:
+  Go to → Advanced → Virtual Server
+  
+ASUS:
+  Go to → Advanced Settings → NAT
+  
+If stuck, Google: "[Your Router Model] port forwarding"
+
+
+TROUBLESHOOTING:
+────────────────────────────────────
+
+❌ Can't find router menu?
+   → Look for "Advanced Settings" tab
+   → Try searching page with Ctrl+F for "port"
+
+❌ Port forwarding won't save?
+   → Disable UPnP first if enabled
+   → Use admin login instead of default
+
+❌ Still can't connect?
+   → Reboot router completely (30 sec power off)
+   → Wait 3 minutes after reboot
+   → Try again
+
+❌ Connects but no players show?
+   → Server might be too new for listings
+   → Share direct IP: 108.188.113.251:30120
+
+
+QUICK TEST ONLINE:
+────────────────────────────────────
+Visit: https://canyouseeme.org/
+Enter Port: 30120
+Result should say: "Success" or "open"
+
+
+DONE! 🎉
+────────────────────────────────────
+Your server is now online!
+
+Players can join:
+  ► krb6e7.cfx.me (server list)
+  ► 108.188.113.251:30120 (direct IP)
+
+
+═══════════════════════════════════════════════════════════════════
+
+⏱️  ESTIMATED TIME: 5-10 minutes
+📱 DIFFICULTY: Easy (mostly clicking)
+⚠️  NEED BOTH TCP AND UDP RULES!
+
+═══════════════════════════════════════════════════════════════════

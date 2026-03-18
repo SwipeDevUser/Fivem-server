@@ -1,0 +1,209 @@
+version: '3.8'
+
+services:
+  # FiveM Server
+  fivem:
+    image: ghcr.io/citizenfx/fivem-server:latest
+    container_name: fivem-server
+    ports:
+      - "30120:30120/tcp"
+      - "30120:30120/udp"
+    volumes:
+      - ./server:/server
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY:-your_key_here}
+      - TZ=UTC
+    restart: unless-stopped
+    networks:
+      - gta_rp_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:30120/info.json || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # MySQL Database
+  database:
+    image: mysql:8-debian
+    container_name: gta-rp-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${FIVEM_DB_PASS:-root}
+      MYSQL_DATABASE: ${FIVEM_DB_NAME:-gta_rp}
+      MYSQL_USER: ${FIVEM_DB_USER:-fivem_user}
+      MYSQL_PASSWORD: ${FIVEM_DB_PASS:-fivem_password}
+      TZ: UTC
+    ports:
+      - "${FIVEM_DB_PORT:-3306}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/migrations:/docker-entrypoint-initdb.d/migrations
+    restart: unless-stopped
+    networks:
+      - gta_rp_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: gta-rp-redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - gta_rp_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Admin Dashboard API
+  admin-api:
+    build:
+      context: ./web/admin-dashboard
+      dockerfile: Dockerfile
+    container_name: gta-rp-admin-api
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${ADMIN_PANEL_PORT:-3000}
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_USER: ${FIVEM_DB_USER}
+      DB_PASS: ${FIVEM_DB_PASS}
+      DB_NAME: ${FIVEM_DB_NAME}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
+    ports:
+      - "${ADMIN_PANEL_PORT:-3000}:${ADMIN_PANEL_PORT:-3000}"
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./web/admin-dashboard:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - gta_rp_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${ADMIN_PANEL_PORT:-3000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Player Portal API
+  player-api:
+    build:
+      context: ./web/player-portal
+      dockerfile: Dockerfile
+    container_name: gta-rp-player-api
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PLAYER_PORTAL_PORT:-3001}
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_USER: ${FIVEM_DB_USER}
+      DB_PASS: ${FIVEM_DB_PASS}
+      DB_NAME: ${FIVEM_DB_NAME}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${PLAYER_PORTAL_PORT:-3001}:${PLAYER_PORTAL_PORT:-3001}"
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./web/player-portal:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - gta_rp_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PLAYER_PORTAL_PORT:-3001}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: gta-rp-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    networks:
+      - gta_rp_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Grafana Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: gta-rp-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_SERVER_ROOT_URL: http://localhost:9091
+    ports:
+      - "9091:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - gta_rp_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # pgAdmin for PostgreSQL/MySQL Management
+  adminer:
+    image: adminer:latest
+    container_name: gta-rp-adminer
+    ports:
+      - "5050:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+    depends_on:
+      - database
+    restart: unless-stopped
+    networks:
+      - gta_rp_network
+
+volumes:
+  db_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  gta_rp_network:
+    driver: bridge

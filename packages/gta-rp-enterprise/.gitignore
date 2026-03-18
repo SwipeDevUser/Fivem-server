@@ -1,0 +1,84 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build outputs
+dist/
+build/
+out/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+.eslintcache
+
+# Temporary files
+tmp/
+temp/
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Backup and rollback
+backups/
+
+# Local development
+.local/
+
+# Sensitive files
+*.key
+*.pem
+private.key
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+
+# IDE specific
+.vscode/settings.json
+.idea/**/*.xml
+
+# Testing
+coverage/
+.nyc_output/
+
+# Database
+*.sql.bak
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class

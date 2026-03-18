@@ -1,0 +1,120 @@
+---
+- name: Configure GTA RP Enterprise Infrastructure
+  hosts: all
+  become: yes
+  vars:
+    docker_version: "20.10"
+    node_version: "18"
+    postgres_version: "14"
+
+  pre_tasks:
+    - name: Update system packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - curl
+        - wget
+        - git
+        - build-essential
+        - tmux
+        - htop
+        - net-tools
+        - fail2ban
+        - ufw
+      when: ansible_os_family == "Debian"
+
+  roles:
+    - role: geerlingguy.docker
+      docker_users: ["{{ ansible_user }}"]
+
+    - role: geerlingguy.nodejs
+      nodejs_version: "18.x"
+
+  tasks:
+    - name: Create directory structure
+      file:
+        path: "/opt/gta-rp/{{ item }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      loop:
+        - server
+        - database
+        - logs
+        - backups
+
+    - name: Configure firewall
+      ufw:
+        rule: allow
+        port: "{{ item.port }}"
+        proto: "{{ item.proto }}"
+        comment: "{{ item.comment }}"
+      loop:
+        - { port: 22, proto: tcp, comment: "SSH" }
+        - { port: 80, proto: tcp, comment: "HTTP" }
+        - { port: 443, proto: tcp, comment: "HTTPS" }
+        - { port: 30120, proto: tcp, comment: "FiveM TCP" }
+        - { port: 30120, proto: udp, comment: "FiveM UDP" }
+        - { port: 3000, proto: tcp, comment: "Admin API" }
+        - { port: 3001, proto: tcp, comment: "Player Portal" }
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+
+    - name: Configure fail2ban
+      blockinfile:
+        path: /etc/fail2ban/jail.local
+        create: yes
+        block: |
+          [DEFAULT]
+          bantime = 3600
+          findtime = 600
+          maxretry = 5
+
+          [sshd]
+          enabled = true
+
+    - name: Restart fail2ban
+      service:
+        name: fail2ban
+        state: restarted
+
+    - name: Create systemd service for FiveM
+      copy:
+        content: |
+          [Unit]
+          Description=GTA RP Enterprise Server
+          After=network.target docker.service
+          Wants=docker.service
+
+          [Service]
+          Type=simple
+          User={{ ansible_user }}
+          ExecStart=/usr/bin/docker-compose -f /opt/gta-rp/docker-compose.yml up
+          Restart=always
+          RestartSec=10
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/gta-rp.service
+      notify: Reload systemd
+
+    - name: Flush handlers
+      meta: flush_handlers
+
+    - name: Enable GTA RP service
+      service:
+        name: gta-rp
+        enabled: yes
+
+  handlers:
+    - name: Reload systemd
+      command: systemctl daemon-reload

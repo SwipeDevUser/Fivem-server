@@ -1,0 +1,62 @@
+name: Hotfix Emergency Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Target environment (production or staging)'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  ARTIFACT: artifact.zip
+
+permissions:
+  contents: read
+
+jobs:
+  hotfix-deploy:
+    name: Emergency Deploy to ${{ github.event.inputs.target_env }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.target_env }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build artifact (zip)
+        run: |
+          mkdir -p out
+          zip -r out/artifact.zip . -x '.git/*' '.github/*' 'node_modules/*'
+
+      - name: Prepare SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key && chmod 600 key
+
+      - name: Deploy to BLUE hosts (hotfix always to blue)
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY_PATH: ${{ github.workspace }}/key
+          HOSTS: ${{ secrets.BLUE_HOSTS }}
+          REMOTE_BASE: /opt/fxserver
+        run: |
+          bash ./deploy/deploy-to-host.sh blue ./out/artifact.zip
+
+      - name: Smoke test BLUE
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY_PATH: ${{ github.workspace }}/key
+        run: |
+          host=$(echo "${{ secrets.BLUE_HOSTS }}" | cut -d',' -f1)
+          ssh -o StrictHostKeyChecking=no -i "$SSH_KEY_PATH" "$SSH_USER@$host" 'curl -fsS http://127.0.0.1:30120/health'
+
+      - name: Manual verification required
+        run: |
+          echo "Hotfix deployed to BLUE hosts. Verify at:"
+          echo "  SSH: ${{ secrets.SSH_USER }}@<BLUE_HOST>"
+          echo "  Health check: http://BLUE_BLUE_IP:30120/health"
+          echo ""
+          echo "If everything looks good, switch Cloudflare pool to BLUE manually"
+          echo "or run: deploy/switch-pool.sh CF_LOAD_BALANCER_ID CF_BLUE_POOL_ID"

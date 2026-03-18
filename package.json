@@ -1,0 +1,34 @@
+{
+  "name": "fivem-monorepo",
+  "version": "1.0.0",
+  "description": "FiveM Server Development - Complete Monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/fivem-dashboard",
+    "apps/fivem-server",
+    "apps/test-dashboard",
+    "packages/gta-rp-enterprise",
+    "packages/gta-rp-platform",
+    "packages/txdata"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "test": "npm run test --workspaces",
+    "clean": "npm run clean --workspaces && rm -rf node_modules"
+  },
+  "keywords": [
+    "fivem",
+    "gta-rp",
+    "roleplay",
+    "server",
+    "dashboard"
+  ],
+  "author": "SwipeDev",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

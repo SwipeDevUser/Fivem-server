@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>United States Supreme Court</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+
+        .court-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect fill="%23191d3d" width="1200" height="800"/><line x1="0" y1="50" x2="1200" y2="50" stroke="%23b8860b" stroke-width="2" opacity="0.3"/><line x1="0" y1="750" x2="1200" y2="750" stroke="%23b8860b" stroke-width="2" opacity="0.3"/></svg>');
+            border: 3px solid #b8860b;
+        }
+
+        /* Header */
+        .court-header {
+            background: linear-gradient(to bottom, #1a1a2e, #16213e);
+            border-bottom: 3px solid #b8860b;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+        }
+
+        .court-seal {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .court-header h1 {
+            font-size: 2.5em;
+            color: #b8860b;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .court-header p {
+            color: #a0a0a0;
+            font-size: 1.1em;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Main Content */
+        .court-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        .court-sidebar {
+            width: 20%;
+            background: #0f3460;
+            border-right: 2px solid #b8860b;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            border-left: 4px solid transparent;
+            color: #c0c0c0;
+            cursor: pointer;
+            font-size: 1em;
+            text-align: left;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-btn:hover {
+            background: #1a4d7a;
+            border-left-color: #b8860b;
+            color: #b8860b;
+            padding-left: 25px;
+        }
+
+        .nav-btn.active {
+            background: #b8860b;
+            border-left-color: #b8860b;
+            color: #1a1a2e;
+        }
+
+        /* Content Area */
+        .court-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Sections */
+        .section h2 {
+            color: #b8860b;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 2px solid #b8860b;
+            padding-bottom: 10px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #b8860b;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a2e;
+            border: 2px solid #b8860b;
+            color: #e0e0e0;
+            border-radius: 5px;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.95em;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(184, 134, 11, 0.5);
+            background: #252545;
+        }
+
+        /* Trial Card */
+        .trial-card {
+            background: #1a1a2e;
+            border: 2px solid #b8860b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .trial-card:hover {
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.4);
+            transform: translateX(5px);
+        }
+
+        .trial-card h3 {
+            color: #b8860b;
+            margin-bottom: 10px;
+        }
+
+        .trial-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .trial-info-item {
+            color: #a0a0a0;
+        }
+
+        .trial-info-label {
+            color: #b8860b;
+            font-weight: bold;
+        }
+
+        .trial-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-scheduled {
+            background: #4a7ba7;
+            color: #e0e0e0;
+        }
+
+        .status-in-progress {
+            background: #b8860b;
+            color: #1a1a2e;
+        }
+
+        .status-concluded {
+            background: #2a5f2a;
+            color: #e0e0e0;
+        }
+
+        /* Evidence List */
+        .evidence-list {
+            background: #0f3460;
+            border: 2px solid #b8860b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .evidence-item {
+            background: #1a1a2e;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 4px solid #b8860b;
+            border-radius: 4px;
+        }
+
+        .evidence-type {
+            color: #b8860b;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .evidence-description {
+            color: #a0a0a0;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+
+        .evidence-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        .status-submitted {
+            background: #666;
+            color: #fff;
+        }
+
+        .status-admitted {
+            background: #2a5f2a;
+            color: #fff;
+        }
+
+        .status-rejected {
+            background: #8b0000;
+            color: #fff;
+        }
+
+        /* Testimony */
+        .testimony-item {
+            background: #1a1a2e;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 4px solid #b8860b;
+            border-radius: 4px;
+        }
+
+        .witness-name {
+            color: #b8860b;
+            font-weight: bold;
+        }
+
+        .witness-statement {
+            color: #a0a0a0;
+            font-style: italic;
+            margin-top: 8px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: #b8860b;
+            color: #1a1a2e;
+        }
+
+        .btn-primary:hover {
+            background: #d4af37;
+            transform: scale(1.05);
+        }
+
+        .btn-success {
+            background: #2a5f2a;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #3a7f3a;
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background: #8b0000;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #a00000;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: #555;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #666;
+        }
+
+        .btn-close {
+            background: #444;
+            color: #fff;
+        }
+
+        .btn-close:hover {
+            background: #555;
+        }
+
+        /* Verdict Display */
+        .verdict-box {
+            background: linear-gradient(135deg, #2a5f2a, #1a3f1a);
+            border: 3px solid #b8860b;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .verdict-label {
+            color: #b8860b;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .verdict-text {
+            color: #fff;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 15px 0;
+            text-transform: uppercase;
+        }
+
+        /* Sentence Info */
+        .sentence-info {
+            background: #0f3460;
+            border: 2px solid #b8860b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .sentence-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #b8860b;
+            color: #e0e0e0;
+        }
+
+        .sentence-line:last-child {
+            border-bottom: none;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #b8860b;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            color: #888;
+            padding: 50px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="court-container">
+        <div class="court-header">
+            <div class="court-seal">⚖️</div>
+            <h1>United States Supreme Court</h1>
+            <p>In God We Trust - 1789</p>
+        </div>
+
+        <div class="court-main">
+            <div class="court-sidebar">
+                <button class="nav-btn active" data-section="dashboard">📋 Dashboard</button>
+                <button class="nav-btn" data-section="new-trial">📝 New Trial</button>
+                <button class="nav-btn" data-section="all-trials">📂 All Trials</button>
+                <button class="nav-btn" data-section="trial-evidence">🔍 Evidence</button>
+                <button class="nav-btn" data-section="trial-testimony">🎤 Testimony</button>
+                <button class="nav-btn" data-section="verdicts">⚖️ Verdicts</button>
+                <button class="nav-btn" data-section="rules">📜 Rules of Court</button>
+            </div>
+
+            <div class="court-content">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="section active">
+                    <h2>Supreme Court Dashboard</h2>
+                    <div class="trial-card">
+                        <h3>Welcome to the Supreme Court</h3>
+                        <p>This is the official United States Supreme Court case management system.</p>
+                        <p style="margin-top: 10px; color: #b8860b;">Navigate using the menu on the left to manage trials, evidence, and verdicts.</p>
+                    </div>
+                </div>
+
+                <!-- New Trial Section -->
+                <div id="new-trial" class="section">
+                    <h2>File New Case</h2>
+                    <form id="newTrialForm">
+                        <div class="form-group">
+                            <label>Defendant Name</label>
+                            <input type="text" id="defendantName" placeholder="Enter defendant name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Case Type</label>
+                            <select id="caseType" required>
+                                <option value="">Select case type...</option>
+                                <option value="Criminal">Criminal</option>
+                                <option value="Civil">Civil</option>
+                                <option value="Felony">Felony</option>
+                                <option value="Misdemeanor">Misdemeanor</option>
+                                <option value="Assault">Assault</option>
+                                <option value="Theft">Theft</option>
+                                <option value="Drug Possession">Drug Possession</option>
+                                <option value="Weapons Violation">Weapons Violation</option>
+                                <option value="DUI">DUI</option>
+                                <option value="Fraud">Fraud</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Initial Charges</label>
+                            <textarea id="charges" placeholder="Enter charges..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Assigned Judge</label>
+                            <input type="text" id="judgeName" placeholder="Judge name" required>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">File Case</button>
+                            <button type="reset" class="btn btn-secondary">Clear</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- All Trials Section -->
+                <div id="all-trials" class="section">
+                    <h2>All Cases</h2>
+                    <div id="trialsContainer">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📂</div>
+                            <p>No trials currently filed</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evidence Section -->
+                <div id="trial-evidence" class="section">
+                    <h2>Submit Evidence</h2>
+                    <form id="evidenceForm">
+                        <div class="form-group">
+                            <label>Trial ID</label>
+                            <input type="text" id="evidenceTrialId" placeholder="Enter trial ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Evidence Type</label>
+                            <select id="evidenceType" required>
+                                <option value="">Select evidence type...</option>
+                                <option value="Physical Evidence">Physical Evidence</option>
+                                <option value="Testimony">Testimony</option>
+                                <option value="Witness Statement">Witness Statement</option>
+                                <option value="Security Footage">Security Footage</option>
+                                <option value="DNA Evidence">DNA Evidence</option>
+                                <option value="Financial Records">Financial Records</option>
+                                <option value="Digital Evidence">Digital Evidence</option>
+                                <option value="Photographs">Photographs</option>
+                                <option value="Documents">Documents</option>
+                                <option value="Audio Recording">Audio Recording</option>
+                                <option value="Forensic Report">Forensic Report</option>
+                                <option value="Expert Report">Expert Report</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="evidenceDescription" placeholder="Describe the evidence..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Additional Notes</label>
+                            <textarea id="evidenceNotes" placeholder="Any additional notes..."></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Submit Evidence</button>
+                            <button type="reset" class="btn btn-secondary">Clear</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Testimony Section -->
+                <div id="trial-testimony" class="section">
+                    <h2>Record Testimony</h2>
+                    <form id="testimonyForm">
+                        <div class="form-group">
+                            <label>Trial ID</label>
+                            <input type="text" id="testimonyTrialId" placeholder="Enter trial ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Witness Name</label>
+                            <input type="text" id="witnessName" placeholder="Enter witness name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Statement</label>
+                            <textarea id="witnessStatement" placeholder="Record witness statement..." required></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Record Testimony</button>
+                            <button type="reset" class="btn btn-secondary">Clear</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Verdicts Section -->
+                <div id="verdicts" class="section">
+                    <h2>Announce Verdict</h2>
+                    <form id="verdictForm">
+                        <div class="form-group">
+                            <label>Trial ID</label>
+                            <input type="text" id="verdictTrialId" placeholder="Enter trial ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Verdict</label>
+                            <select id="verdictType" required>
+                                <option value="">Select verdict...</option>
+                                <option value="Guilty">Guilty</option>
+                                <option value="Not Guilty">Not Guilty</option>
+                                <option value="Acquitted">Acquitted</option>
+                                <option value="Charges Dismissed">Charges Dismissed</option>
+                                <option value="Mistrial">Mistrial</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea id="verdictNotes" placeholder="Additional notes on verdict..."></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Announce Verdict</button>
+                            <button type="button" id="executeSentenceBtn" class="btn btn-danger" style="display:none;">Execute Sentence</button>
+                            <button type="button" id="appealBtn" class="btn btn-secondary" style="display:none;">File Appeal</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Rules Section -->
+                <div id="rules" class="section">
+                    <h2>Rules of Court</h2>
+                    <div style="background: #0f3460; border: 2px solid #b8860b; border-radius: 8px; padding: 20px;">
+                        <ol style="color: #e0e0e0; line-height: 2;">
+                            <li style="color: #b8860b; font-weight: bold; margin-bottom: 10px;">Defendant has right to legal representation</li>
+                            <li style="color: #b8860b; font-weight: bold; margin-bottom: 10px;">Defendant has right to remain silent</li>
+                            <li style="color: #b8860b; font-weight: bold; margin-bottom: 10px;">All evidence must be admissible</li>
+                            <li style="color: #b8860b; font-weight: bold; margin-bottom: 10px;">Jury presumption of innocence until proven guilty</li>
+                            <li style="color: #b8860b; font-weight: bold; margin-bottom: 10px;">Prosecution must prove beyond reasonable doubt</li>
+                            <li style="color: #b8860b; font-weight: bold; margin-bottom: 10px;">Right to cross-examination</li>
+                            <li style="color: #b8860b; font-weight: bold; margin-bottom: 10px;">Right to appeal verdict</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const section = this.dataset.section;
+                
+                // Update active button
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update active section
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+            });
+        });
+
+        // Forms
+        document.getElementById('newTrialForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch(`https://${GetParentResourceName()}/createTrial`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    defendantName: document.getElementById('defendantName').value,
+                    caseType: document.getElementById('caseType').value,
+                    charges: [document.getElementById('charges').value],
+                    judgeName: document.getElementById('judgeName').value
+                })
+            }).catch(e => console.error(e));
+            
+            this.reset();
+        });
+
+        document.getElementById('evidenceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch(`https://${GetParentResourceName()}/submitEvidence`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    trialId: document.getElementById('evidenceTrialId').value,
+                    evidenceType: document.getElementById('evidenceType').value,
+                    description: document.getElementById('evidenceDescription').value,
+                    notes: document.getElementById('evidenceNotes').value
+                })
+            }).catch(e => console.error(e));
+            
+            this.reset();
+        });
+
+        document.getElementById('testimonyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch(`https://${GetParentResourceName()}/addTestimony`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    trialId: document.getElementById('testimonyTrialId').value,
+                    witnessName: document.getElementById('witnessName').value,
+                    statement: document.getElementById('witnessStatement').value
+                })
+            }).catch(e => console.error(e));
+            
+            this.reset();
+        });
+
+        document.getElementById('verdictForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch(`https://${GetParentResourceName()}/setVerdict`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    trialId: document.getElementById('verdictTrialId').value,
+                    verdict: document.getElementById('verdictType').value,
+                    notes: document.getElementById('verdictNotes').value
+                })
+            }).catch(e => console.error(e));
+        });
+
+        // Message handler
+        window.addEventListener('message', event => {
+            const data = event.data;
+            
+            if (data.type === 'openCourt') {
+                document.body.style.display = 'block';
+            }
+            
+            if (data.type === 'displayTrials') {
+                const container = document.getElementById('trialsContainer');
+                container.innerHTML = '';
+                
+                for (const [id, trial] of Object.entries(data.trials)) {
+                    const card = document.createElement('div');
+                    card.className = 'trial-card';
+                    card.innerHTML = `
+                        <h3>${trial.defendant}</h3>
+                        <div class="trial-info">
+                            <div class="trial-info-item">
+                                <span class="trial-info-label">Case Type:</span> ${trial.caseType}
+                            </div>
+                            <div class="trial-info-item">
+                                <span class="trial-info-label">Judge:</span> ${trial.judge}
+                            </div>
+                            <div class="trial-info-item">
+                                <span class="trial-info-label">Evidence:</span> ${trial.evidence.length}
+                            </div>
+                            <div class="trial-info-item">
+                                <span class="trial-info-label">Testimony:</span> ${trial.testimony.length}
+                            </div>
+                        </div>
+                        <span class="trial-status status-${trial.status.toLowerCase().replace(/\s+/g, '-')}">${trial.status}</span>
+                    `;
+                    container.appendChild(card);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

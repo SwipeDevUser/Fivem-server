@@ -1,0 +1,237 @@
+# Florida geography canon for dashboard v1
+
+Use this document as the source of truth for market and area taxonomy in v1. Treat the list below as product canon even if some entries appear outside the expected county grouping or contain alternate spellings. Preserve all values. Add normalized slugs and alias support in code, plus a content QA report.
+
+## ORLANDO / CENTRAL FLORIDA
+
+- Downtown Orlando
+- Parramore
+- College Park
+- Silver Star
+- Pine Hills
+- Mercy Drive
+- Washington Shores
+- Malibu Groves
+- Richmond Heights
+- Rosemont
+- Clear Lake
+- Holden Heights
+- MetroWest
+- West Colonial
+- The Dovers
+- South Orange
+- Thornton Park
+- Lake Eola
+- Audubon Park
+- Baldwin Park
+- Milk District
+- Mills 50
+- SoDo
+- Conway
+- Azalea Park
+- Engelwood Park
+- Union Park
+- Alafaya
+- Waterford Lakes
+- Avalon Park
+- Lake Nona
+- Hunters Creek
+- Williamsburg
+- Doctor Phillips
+- Windermere
+- Winter Garden
+- Ocoee
+- Apopka
+- Maitland
+- Altamonte Springs
+- Casselberry
+- Longwood
+- Lake Mary
+- Sanford
+- Oviedo
+- Kissimmee
+- Celebration
+- Reunion
+- St. Cloud
+- Clermont
+
+## JACKSONVILLE / DUVAL
+
+- Downtown Jacksonville
+- Springfield
+- San Marco
+- Riverside
+- Avondale
+- Ortega
+- Murray Hill
+- Brooklyn
+- Arlington
+- Mandarin
+- Southside
+- Northside
+- Westside
+- Eastside
+- St. Nicholas
+- LaVilla
+- Durkeeville
+- Brentwood
+- Moncrief
+- Oceanway
+- Grand Park
+- Mixon Town
+- New Town
+- Paxon
+- Lackawanna
+- Cedar Hills
+- Normandy
+- Confederate Point
+- Hyde Park
+- Argyle Forest
+- Oakleaf
+- Baymeadows
+- Deerwood
+- Southpoint
+- Regency
+- Fort Caroline
+- Atlantic Beach
+- Neptune Beach
+- Jacksonville Beach
+- Ponte Vedra Beach
+- Orange Park
+- Fleming Island
+- Green Cove Springs
+- Yulee
+- Amelia Island
+- Fernandina Beach
+- Nocatee
+- Mayport
+- Baldwin
+- Callahan
+
+## MIAMI / MIAMI-DADE
+
+- Downtown Miami
+- Brickell
+- Wynwood
+- Edgewater
+- Midtown
+- Design District
+- Overtown
+- Liberty City
+- Little Haiti
+- Little Havana
+- Allapattah
+- Buena Vista
+- Upper Eastside
+- MiMo
+- Morningside
+- Model City
+- Brownsville
+- West Little River
+- Coconut Grove
+- Coral Way
+- Shenandoah
+- The Roads
+- Flagami
+- West Flagler
+- Coral Gables
+- South Miami
+- Pinecrest
+- Kendall
+- Westchester
+- Doral
+- Hialeah
+- Hialeah Gardens
+- Miami Lakes
+- Cutler Bay
+- Homestead
+- Florida City
+- Palmetto Bay
+- Key Biscayne
+- Fisher Island
+- Miami Beach
+- South Beach
+- Mid Beach
+- North Beach
+- Sunny Isles Beach
+- Aventura
+- North Miami
+- North Miami Beach
+- Golden Glades
+- Opa-locka
+- Carol City (Miami Gardens)
+
+## DAYTONA / VOLUSIA
+
+- Daytona Beach
+- Downtown Daytona
+- Midtown
+- Seabreeze
+- Main Street
+- Boardwalk
+- Beach Street
+- Speedway
+- Daytona Beach Shores
+- South Daytona
+- Holly Hill
+- Ormond Beach
+- Ormond-by-the-Sea
+- Port Orange
+- Ponce Inlet
+- Wilbur-by-the-Sea
+- New Smyrna Beach
+- Edgewater
+- DeLand
+- Deltona
+- DeBary
+- Orange City
+- Lake Helen
+- Daytona Highlands
+- Indigo Lakes
+- LPGA area
+- Pelican Bay
+- Tuscawilla Park
+- Bethune Point
+- Mason Avenue
+- Ridgewood Avenue
+- International Speedway corridor
+- Tomoka Farms
+- Ormond Lakes
+- Spruce Creek
+- Sugar Mill
+- Turnbull Bay
+- Destination Daytona
+- Tiger Bay
+- Allandale
+- Breakers area
+- Halifax area
+- Beachside Daytona
+- Westside Daytona
+- ISB corridor
+- Clyde Morris area
+- Nova Road corridor
+- Hand Avenue area
+- Granada Boulevard (Ormond)
+- Canal Street (New Smyrna)
+- Vero Beach
+- New symerna
+
+## Required data model
+For every market and area, generate:
+- `marketKey`
+- `marketLabel`
+- `areaKey`
+- `areaLabel`
+- `slug`
+- `searchAliases`
+- `sortOrder`
+- `isActive`
+- `contentWarnings` (array)
+
+## Required UX support
+- market and area search
+- multi-select filters
+- URL query param serialization
+- human-friendly chips and badges
+- audit-friendly immutable IDs
+- alias search for typos and alternate spellings

@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Gun America - Kissimmee</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .mga-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="bulletHoles" x="20" y="20" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="2" fill="%23333"/></pattern></defs><rect fill="%23000" width="1200" height="800"/><rect fill="url(%23bulletHoles)" width="1200" height="800"/></svg>');
+            border: 5px solid #ff0000;
+            box-shadow: inset 0 0 50px rgba(255, 0, 0, 0.3);
+        }
+
+        /* Header with American Theme */
+        .mga-header {
+            background: linear-gradient(to bottom, #1a1a1a, #000);
+            border-bottom: 4px solid #ff0000;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mga-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, #fff, #ff0000, #fff, #ff0000, #fff);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .mga-flag {
+            display: inline-block;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 5px #ff0000);
+        }
+
+        .mga-header h1 {
+            font-size: 3em;
+            color: #ff0000;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000;
+            font-weight: 900;
+        }
+
+        .mga-header .subtitle {
+            color: #fff;
+            font-size: 1.3em;
+            margin-top: 8px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .mga-header .tagline {
+            color: #ffff00;
+            font-size: 0.95em;
+            margin-top: 5px;
+            font-style: italic;
+            text-shadow: 1px 1px 0 #ff0000;
+        }
+
+        /* Main Content */
+        .mga-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        .mga-sidebar {
+            width: 22%;
+            background: linear-gradient(to right, #000, #1a1a1a);
+            border-right: 3px solid #ff0000;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
+
+        .mga-sidebar::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                #ff0000 0px,
+                #ff0000 10px,
+                #000 10px,
+                #000 20px
+            );
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 18px 20px;
+            background: transparent;
+            border: none;
+            border-left: 5px solid transparent;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1.05em;
+            text-align: left;
+            transition: all 0.2s ease;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #333;
+        }
+
+        .nav-btn:hover {
+            background: #1a1a1a;
+            border-left-color: #ffff00;
+            color: #ffff00;
+            padding-left: 30px;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        .nav-btn.active {
+            background: #ff0000;
+            border-left-color: #ffff00;
+            color: #000;
+            font-weight: 900;
+            text-shadow: none;
+        }
+
+        /* Content Area */
+        .mga-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section h2 {
+            color: #ff0000;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            border-bottom: 3px solid #ff0000;
+            padding-bottom: 12px;
+            text-shadow: 2px 2px 0 #000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+
+        /* Items Grid */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+            border: 3px solid #ff0000;
+            border-radius: 0;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 220px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(to right, #ff0000, #ffff00, #ff0000);
+        }
+
+        .item-card:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8), inset 0 0 20px rgba(255, 0, 0, 0.2);
+            border-color: #ffff00;
+        }
+
+        .item-card.selected {
+            background: #ff0000;
+            border-color: #ffff00;
+            box-shadow: 0 0 40px rgba(255, 255, 0, 0.8);
+        }
+
+        .item-card.selected .item-name,
+        .item-card.selected .item-price {
+            color: #000;
+            text-shadow: none;
+        }
+
+        .item-icon {
+            font-size: 3.5em;
+            margin-bottom: 12px;
+            text-align: center;
+            filter: drop-shadow(0 0 5px #ff0000);
+        }
+
+        .item-name {
+            font-size: 1.2em;
+            font-weight: 900;
+            color: #ffff00;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #ff0000;
+        }
+
+        .item-description {
+            font-size: 0.85em;
+            color: #aaa;
+            margin-bottom: 12px;
+            min-height: 30px;
+            font-weight: bold;
+        }
+
+        .item-price {
+            font-size: 1.6em;
+            color: #ffff00;
+            font-weight: 900;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 2px solid #ff0000;
+            text-shadow: 1px 1px 0 #ff0000;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #ffff00;
+            margin-bottom: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 2px solid #ff0000;
+            color: #fff;
+            border-radius: 0;
+            font-family: 'Arial', sans-serif;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.3);
+            border-color: #ffff00;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: 3px solid #ff0000;
+            border-radius: 0;
+            font-size: 1em;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: #ff0000;
+            color: #000;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+            background: #ffff00;
+            border-color: #ffff00;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #ff0000;
+            border-color: #ff0000;
+        }
+
+        .btn-secondary:hover {
+            background: #ff0000;
+            color: #000;
+        }
+
+        .btn-close {
+            background: #333;
+            border-color: #555;
+            color: #fff;
+        }
+
+        .btn-close:hover {
+            background: #555;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Cart Badge */
+        .cart-badge {
+            background: #ffff00;
+            color: #000;
+            padding: 8px 15px;
+            border-radius: 0;
+            font-weight: 900;
+            font-size: 1em;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        /* Receipt */
+        .receipt-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            border: 5px solid #ff0000;
+            border-radius: 0;
+            padding: 30px;
+            width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+        }
+
+        .receipt-container.show {
+            display: block;
+        }
+
+        .receipt-header {
+            text-align: center;
+            border-bottom: 3px solid #ff0000;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .receipt-header h2 {
+            color: #ff0000;
+            font-size: 2em;
+            text-shadow: 2px 2px 0 #000;
+            text-transform: uppercase;
+        }
+
+        .receipt-header p {
+            color: #ffff00;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #ff0000;
+            color: #fff;
+        }
+
+        .receipt-item-name {
+            flex: 1;
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .receipt-item-total {
+            color: #ff0000;
+            font-weight: 900;
+            font-size: 1.1em;
+        }
+
+        .receipt-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 0;
+            font-size: 1.5em;
+            border-top: 3px solid #ff0000;
+            border-bottom: 3px solid #ff0000;
+            margin: 20px 0;
+            color: #ffff00;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #ff0000;
+            color: #ffff00;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .receipt-close {
+            margin-top: 25px;
+            width: 100%;
+        }
+
+        /* Footer */
+        .mga-footer {
+            padding: 20px;
+            background: #000;
+            border-top: 4px solid #ff0000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -4px 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .mga-total {
+            font-size: 1.5em;
+            color: #ffff00;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 0 #ff0000;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff0000;
+            border-radius: 0;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffff00;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            color: #888;
+            padding: 50px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            color: #ff0000;
+            font-size: 1.3em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="mga-container">
+        <div class="mga-header">
+            <div class="mga-flag">🇺🇸</div>
+            <h1>Machine Gun America</h1>
+            <div class="subtitle">Full-Auto Experience • Kissimmee Headquarters</div>
+            <div class="tagline">Unleash The Power • Military Grade Equipment</div>
+        </div>
+
+        <div class="mga-main">
+            <div class="mga-sidebar">
+                <button class="nav-btn active" data-section="full-auto">
+                    🔫 Full-Auto Weapons
+                </button>
+                <button class="nav-btn" data-section="precision-rifles">
+                    🎯 Precision Rifles
+                </button>
+                <button class="nav-btn" data-section="military-grade">
+                    💥 Military Grade
+                </button>
+                <button class="nav-btn" data-section="tactical-pistols">
+                    🔰 Tactical Pistols
+                </button>
+                <button class="nav-btn" data-section="shotguns-tactical">
+                    ⚔️ Tactical Shotguns
+                </button>
+                <button class="nav-btn" data-section="military-ammunition">
+                    📦 Military Ammo
+                </button>
+                <button class="nav-btn" data-section="tactical-gear">
+                    ⚙️ Tactical Gear
+                </button>
+                <button class="nav-btn" data-section="ammunition-belts">
+                    🔗 Ammo Belts
+                </button>
+            </div>
+
+            <div class="mga-content">
+                <div id="full-auto" class="section active">
+                    <h2>🔫 Full-Auto Weapons</h2>
+                    <div class="items-grid" id="fullAutoGrid"></div>
+                </div>
+
+                <div id="precision-rifles" class="section">
+                    <h2>🎯 Precision Rifles</h2>
+                    <div class="items-grid" id="precisionRiflesGrid"></div>
+                </div>
+
+                <div id="military-grade" class="section">
+                    <h2>💥 Military Grade</h2>
+                    <div class="items-grid" id="militaryGradeGrid"></div>
+                </div>
+
+                <div id="tactical-pistols" class="section">
+                    <h2>🔰 Tactical Pistols</h2>
+                    <div class="items-grid" id="tacticalPistolsGrid"></div>
+                </div>
+
+                <div id="shotguns-tactical" class="section">
+                    <h2>⚔️ Tactical Shotguns</h2>
+                    <div class="items-grid" id="shotgunsTacticalGrid"></div>
+                </div>
+
+                <div id="military-ammunition" class="section">
+                    <h2>📦 Military Ammunition</h2>
+                    <div class="items-grid" id="militaryAmmoGrid"></div>
+                </div>
+
+                <div id="tactical-gear" class="section">
+                    <h2>⚙️ Tactical Gear</h2>
+                    <div class="items-grid" id="tacticalGearGrid"></div>
+                </div>
+
+                <div id="ammunition-belts" class="section">
+                    <h2>🔗 Ammunition Belts</h2>
+                    <div class="items-grid" id="ammoBeltsGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mga-footer">
+        <div class="mga-total">
+            Total: $<span id="totalAmount">0</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn" id="buyBtn" disabled>ADD TO ARSENAL</button>
+            <button class="btn" id="checkoutBtn" disabled>
+                CHECKOUT <span class="cart-badge" id="cartBadge">0</span>
+            </button>
+            <button class="btn btn-close" id="closeBtn">EXIT</button>
+        </div>
+    </div>
+
+    <div class="receipt-container" id="receiptContainer">
+        <div class="receipt-header">
+            <h2>🇺🇸 Receipt 🇺🇸</h2>
+            <p>Machine Gun America - Kissimmee Headquarters</p>
+        </div>
+        <div id="receiptItems"></div>
+        <div class="receipt-total">
+            <span>TOTAL:</span>
+            <span id="receiptTotal">$0</span>
+        </div>
+        <div class="receipt-footer">
+            <p>UNLEASH THE POWER</p>
+            <p>Thank You For Your Business</p>
+            <p>Tactical Excellence Since 2005</p>
+        </div>
+        <button class="btn receipt-close" id="receiptCloseBtn">CLOSE RECEIPT</button>
+    </div>
+
+    <script>
+        const mgaData = window.mgaStore || {};
+        let selectedItem = null;
+        let cart = [];
+        let currentCategory = 'full-auto';
+
+        function init() {
+            setupEventListeners();
+            populateAllCategories();
+            loadItems(currentCategory);
+            updateCartBadge();
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.section;
+                    loadItems(currentCategory);
+                    selectedItem = null;
+                    document.querySelectorAll('.item-card').forEach(c => c.classList.remove('selected'));
+                });
+            });
+
+            document.getElementById('buyBtn').addEventListener('click', addToCart);
+            document.getElementById('checkoutBtn').addEventListener('click', checkout);
+            document.getElementById('closeBtn').addEventListener('click', closeMGA);
+            document.getElementById('receiptCloseBtn').addEventListener('click', closeReceipt);
+        }
+
+        function populateAllCategories() {
+            const categoryMapping = {
+                'full-auto': 'fullAutoGrid',
+                'precision-rifles': 'precisionRiflesGrid',
+                'military-grade': 'militaryGradeGrid',
+                'tactical-pistols': 'tacticalPistolsGrid',
+                'shotguns-tactical': 'shotgunsTacticalGrid',
+                'military-ammunition': 'militaryAmmoGrid',
+                'tactical-gear': 'tacticalGearGrid',
+                'ammunition-belts': 'ammoBeltsGrid'
+            };
+
+            const categoryNames = {
+                'full-auto': 'full_auto',
+                'precision-rifles': 'precision_rifles',
+                'military-grade': 'military_grade',
+                'tactical-pistols': 'tactical_pistols',
+                'shotguns-tactical': 'shotguns_tactical',
+                'military-ammunition': 'military_ammunition',
+                'tactical-gear': 'tactical_gear',
+                'ammunition-belts': 'ammunition_belts'
+            };
+
+            for (const [urlCategory, gridId] of Object.entries(categoryMapping)) {
+                const categoryName = categoryNames[urlCategory];
+                const items = mgaData.categories?.[categoryName]?.items || [];
+                const grid = document.getElementById(gridId);
+                if (grid) {
+                    grid.innerHTML = '';
+                    items.forEach(item => {
+                        const card = createItemCard(item);
+                        grid.appendChild(card);
+                    });
+                }
+            }
+        }
+
+        function createItemCard(item) {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div>
+                    <div class="item-icon">🔫</div>
+                    <div class="item-name">${item.label}</div>
+                    <div class="item-description">${item.name}</div>
+                </div>
+                <div class="item-price">$${item.price.toLocaleString()}</div>
+            `;
+
+            card.addEventListener('click', () => selectItem(item, card));
+            return card;
+        }
+
+        function loadItems(category) {
+            const categoryNames = {
+                'full-auto': 'full_auto',
+                'precision-rifles': 'precision_rifles',
+                'military-grade': 'military_grade',
+                'tactical-pistols': 'tactical_pistols',
+                'shotguns-tactical': 'shotguns_tactical',
+                'military-ammunition': 'military_ammunition',
+                'tactical-gear': 'tactical_gear',
+                'ammunition-belts': 'ammunition_belts'
+            };
+
+            const items = mgaData.categories?.[categoryNames[category]]?.items || [];
+
+            if (items.length === 0) {
+                document.getElementById('buyBtn').disabled = true;
+            }
+
+            document.getElementById('buyBtn').disabled = !selectedItem;
+        }
+
+        function selectItem(item, element) {
+            document.querySelectorAll('.item-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedItem = item;
+            document.getElementById('totalAmount').textContent = item.price.toLocaleString();
+            document.getElementById('buyBtn').disabled = false;
+        }
+
+        function addToCart() {
+            if (!selectedItem) return;
+
+            const existingItem = cart.find(i => i.name === selectedItem.name);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({
+                    name: selectedItem.name,
+                    label: selectedItem.label,
+                    price: selectedItem.price,
+                    quantity: 1
+                });
+            }
+
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartBadge').textContent = total;
+            document.getElementById('checkoutBtn').disabled = total === 0;
+        }
+
+        function checkout() {
+            if (cart.length === 0) return;
+
+            fetch(`https://${GetParentResourceName()}/mgaCheckout`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cart: cart })
+            }).then(r => r.json()).catch(e => console.error(e));
+
+            showReceipt();
+        }
+
+        function showReceipt() {
+            const receiptItems = document.getElementById('receiptItems');
+            receiptItems.innerHTML = '';
+
+            let total = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'receipt-item';
+                itemDiv.innerHTML = `
+                    <span class="receipt-item-name">${item.label} x${item.quantity}</span>
+                    <span class="receipt-item-total">$${itemTotal.toLocaleString()}</span>
+                `;
+                receiptItems.appendChild(itemDiv);
+            });
+
+            document.getElementById('receiptTotal').textContent = `$${total.toLocaleString()}`;
+            document.getElementById('receiptContainer').classList.add('show');
+
+            cart = [];
+            updateCartBadge();
+        }
+
+        function closeReceipt() {
+            document.getElementById('receiptContainer').classList.remove('show');
+        }
+
+        function closeMGA() {
+            fetch(`https://${GetParentResourceName()}/closeMGA`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            }).then(r => r.json()).catch(e => console.error(e));
+        }
+
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'openMGA') {
+                window.mgaStore = event.data.store;
+                document.body.style.display = 'block';
+                populateAllCategories();
+                loadItems('full-auto');
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

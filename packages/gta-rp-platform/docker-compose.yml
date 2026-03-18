@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: gta-rp-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-fivem_db}
+      POSTGRES_USER: ${DB_USER:-fivem}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schemas:/docker-entrypoint-initdb.d
+    networks:
+      - gta-rp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-fivem}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: gta-rp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - gta-rp-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Admin Portal Backend
+  admin-api:
+    build:
+      context: ./web/admin-portal
+      dockerfile: Dockerfile
+    container_name: gta-rp-admin-api
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-fivem}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_NAME: ${DB_NAME:-fivem_db}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${ADMIN_JWT_SECRET:-change-me}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gta-rp-network
+    restart: unless-stopped
+    volumes:
+      - ./web/admin-portal:/app
+      - /app/node_modules
+
+  # Support Dashboard Backend
+  support-api:
+    build:
+      context: ./web/support-dashboard
+      dockerfile: Dockerfile
+    container_name: gta-rp-support-api
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-fivem}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_NAME: ${DB_NAME:-fivem_db}
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gta-rp-network
+    restart: unless-stopped
+    volumes:
+      - ./web/support-dashboard:/app
+      - /app/node_modules
+
+  # FiveM Server (Local - runs in separate container if containerized)
+  fivem-server:
+    build:
+      context: ./infrastructure/docker
+      dockerfile: Dockerfile.fivem
+    container_name: gta-rp-fivem
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-GTA RP}
+      SERVER_PORT: ${FIVEM_PORT:-30120}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-fivem}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_NAME: ${DB_NAME:-fivem_db}
+    ports:
+      - "30120:30120"
+      - "30120:30120/udp"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./server:/fivem/server
+      - ./server/resources:/fivem/resources
+      - fivem_data:/fivem/data
+    networks:
+      - gta-rp-network
+    restart: unless-stopped
+
+  # Adminer (Database Management UI - Optional)
+  adminer:
+    image: adminer
+    container_name: gta-rp-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - gta-rp-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  fivem_data:
+
+networks:
+  gta-rp-network:
+    driver: bridge

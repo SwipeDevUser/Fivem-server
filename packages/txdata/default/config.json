@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "database": {
+    "engine": "sqlite",
+    "path": "./data/database.db"
+  },
+  "general": {
+    "serverName": "BORN IN FL RP"
+  },
+  "server": {
+    "dataPath": "C:/Users/elias/Documents/FiveM Development/TEST/"
+  }
+}

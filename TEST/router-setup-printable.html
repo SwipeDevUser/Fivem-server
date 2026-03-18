@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiveM Router Port Forwarding Setup</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0066cc;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .step {
+            background: #f9f9f9;
+            border: 2px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            page-break-inside: avoid;
+        }
+        .step h2 {
+            color: #0066cc;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .step-number {
+            display: inline-block;
+            background: #0066cc;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .config-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre;
+        }
+        .checkmark { color: green; font-weight: bold; }
+        .important { color: red; font-weight: bold; }
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #155724;
+        }
+        ul { margin-left: 20px; margin-top: 10px; }
+        li { margin: 8px 0; }
+        .highlight {
+            background: #ffff00;
+            padding: 2px 4px;
+            font-weight: bold;
+        }
+        @media print {
+            body { background: white; }
+            .container { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 FiveM Server - Router Port Forwarding Setup</h1>
+        <p class="subtitle">Complete in 5-10 minutes | Print this page as reference</p>
+
+        <div class="info-box">
+            <strong>📋 YOUR SERVER DETAILS (Save These):</strong><br>
+            Internal IP: <strong>192.168.1.11</strong><br>
+            External Port: <strong>30120</strong><br>
+            Internal Port: <strong>30120</strong><br>
+            Protocol: <strong>TCP & UDP (2 rules needed!)</strong>
+        </div>
+
+        <div class="step">
+            <h2><span class="step-number">1</span>Open Your Router</h2>
+            <p>Open your web browser and go to <span class="highlight">ONE</span> of these URLs:</p>
+            <div class="config-box">http://192.168.1.1
+http://192.168.0.1
+http://routerlogin.net
+http://router.asus.com</div>
+            <p><strong>❓ Not working?</strong> Try the IP address printed on your router label.</p>
+        </div>
+
+        <div class="step">
+            <h2><span class="step-number">2</span>Login to Router Admin Panel</h2>
+            <p>Use these credentials (default for most routers):</p>
+            <div class="config-box">Username: admin
+Password: admin</div>
+            <p><em>If login fails, check your router manual or label on the back of the router.</em></p>
+        </div>
+
+        <div class="step">
+            <h2><span class="step-number">3</span>Find Port Forwarding Settings</h2>
+            <p>Look for one of these menu items (usually under "Advanced" or "Settings"):</p>
+            <ul>
+                <li>✓ Port Forwarding</li>
+                <li>✓ Virtual Server</li>
+                <li>✓ Port Mapping</li>
+                <li>✓ NAT Settings</li>
+                <li>✓ UPnP/UPnP IGD (if others not available)</li>
+            </ul>
+            <p><strong>💡 Tip:</strong> Use Ctrl+F on router page to search for "port"</p>
+        </div>
+
+        <div class="step">
+            <h2><span class="step-number">4</span>Add Rule #1 - TCP Port</h2>
+            <p>Click "Add New" or "Add Rule" and fill in:</p>
+            <div class="config-box">External Port:    30120
+Internal Port:    30120
+Internal IP:      192.168.1.11
+Protocol:         TCP
+Enable:           ✓ YES</div>
+            <p>Click <strong>SAVE</strong></p>
+        </div>
+
+        <div class="step">
+            <h2><span class="step-number">5</span>Add Rule #2 - UDP Port</h2>
+            <p>Click "Add New" or "Add Rule" again and fill in:</p>
+            <div class="config-box">External Port:    30120
+Internal Port:    30120
+Internal IP:      192.168.1.11
+Protocol:         UDP
+Enable:           ✓ YES</div>
+            <p class="important">⚠️ IMPORTANT: You need BOTH TCP and UDP rules!</p>
+            <p>Click <strong>SAVE</strong></p>
+        </div>
+
+        <div class="step">
+            <h2><span class="step-number">6</span>Apply and Save Settings</h2>
+            <p>Look for one of these buttons:</p>
+            <ul>
+                <li>Apply</li>
+                <li>Save</li>
+                <li>OK</li>
+                <li>Restart</li>
+            </ul>
+            <p><strong>⏱️ Wait 2-3 minutes</strong> for router to apply changes</p>
+        </div>
+
+        <div class="step">
+            <h2><span class="step-number">7</span>Test Your Setup</h2>
+            <p>Open FiveM client and test:</p>
+            <div class="config-box">1. Press F8 to open console
+2. Type ONE of these:
+   > connect krb6e7.cfx.me
+   OR
+   > connect 108.188.113.251:30120
+3. Try to join</div>
+            <div class="success-box">
+                <strong>✓ If you join successfully:</strong><br>
+                Your port forwarding is working! 🎉
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>🔧 Router-Specific Help</h2>
+            <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <th style="text-align: left; padding: 8px;"><strong>Router Brand</strong></th>
+                    <th style="text-align: left; padding: 8px;"><strong>Menu Path</strong></th>
+                </tr>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 8px;">TP-Link</td>
+                    <td style="padding: 8px;">Advanced → Network → NAT Forwarding</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 8px;">Netgear</td>
+                    <td style="padding: 8px;">Advanced → Port Forwarding</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 8px;">Linksys</td>
+                    <td style="padding: 8px;">Advanced → Port Range Forwarding</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 8px;">D-Link</td>
+                    <td style="padding: 8px;">Advanced → Virtual Server</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px;">ASUS</td>
+                    <td style="padding: 8px;">Advanced Settings → NAT</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="step" style="background: #e8f5e9; border-color: #4caf50;">
+            <h2>✓ Done!</h2>
+            <p style="font-size: 16px; margin: 15px 0;">Your FiveM server is now online!</p>
+            <div class="config-box">Players can join using:
+
+1. krb6e7.cfx.me
+   (via FiveM server list)
+
+2. 108.188.113.251:30120
+   (direct IP connection)</div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; color: #999; border-top: 1px solid #ddd; padding-top: 20px;">
+            <p><strong>Estimated Time:</strong> 5-10 minutes</p>
+            <p><strong>Difficulty Level:</strong> Easy (mostly clicking)</p>
+            <p style="font-size: 12px; margin-top: 10px;">Generated: March 18, 2026 | Server ID: krb6e7</p>
+        </div>
+    </div>
+</body>
+</html>
